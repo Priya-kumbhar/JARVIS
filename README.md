@@ -178,7 +178,7 @@ JARVIS is designed with a **permission-first** approach:
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 1 | ✅ Done | Setup, tools, folder structure, Git, Ruff, CodeRabbit |
-| 2 | 🔄 In Progress | ChatAgent + Gemini API + settings loader |
+| 2 | ✅ Done | ChatAgent + Gemini API + settings loader |
 | 3 | ⏳ Planned | FastAPI backend — Python ↔ Electron bridge |
 | 4 | ⏳ Planned | Electron window + React chat UI |
 | 5 | ⏳ Planned | Live2D anime avatar with expressions |

@@ -26,9 +26,7 @@ select = [
 
 # Rules to ignore (with reasons)
 ignore = [
-    "ANN101", # missing type for 'self' — not needed
-    "ANN102", # missing type for 'cls'  — not needed
-    "ERA001", # commented-out code — too aggressive for learning project
+    "ERA001", # commented-out code — too aggressive for a learning project
 ]
 
 # Allow fix for all fixable rules
