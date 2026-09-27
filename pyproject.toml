@@ -15,7 +15,6 @@ keywords = ["ai", "assistant", "desktop", "anime", "langgraph", "gemini"]
 dependencies = [
     "fastapi>=0.141.1",
     "google-genai>=2.25.0",
-    "google-generativeai>=0.8",
     "python-dotenv>=1.0",
     "rich>=13.0",
     "uvicorn>=0.53.0",
@@ -36,11 +35,11 @@ build-backend = "hatchling.build"
 # Tell hatchling which folders are Python packages to ship
 packages = ["agents", "core"]
 
-[tool.uv]
-dev-dependencies = [
+[tool.ruff]
+# Ruff config lives in .ruff.toml
+
+[dependency-groups]
+dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
 ]
-
-[tool.ruff]
-# Ruff config lives in .ruff.toml

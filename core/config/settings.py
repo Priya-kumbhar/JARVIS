@@ -11,7 +11,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # backup — can be None
 JARVIS_MODE = os.getenv("JARVIS_MODE", "development")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-AI_MODEL = "gemini-2.0-flash"  # current recommended free-tier model (new SDK)
+AI_MODEL = "gemini-2.5-flash"  # stable free-tier model (3.x models had 503 issues)
 
 if GEMINI_API_KEY is None:
     raise ValueError(

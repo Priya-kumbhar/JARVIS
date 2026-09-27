@@ -3,7 +3,6 @@ from google.genai import types
 
 from core.config.settings import AI_MODEL, GEMINI_API_KEY
 
-# Create one shared client — the new SDK uses a Client object
 _client = genai.Client(api_key=GEMINI_API_KEY)
 
 JARVIS_SYSTEM_PROMPT = (
