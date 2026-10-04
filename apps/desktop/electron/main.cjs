@@ -8,7 +8,7 @@ const isDev = process.env.NODE_ENV === "development";
 function createWindow() {
   const win = new BrowserWindow({
     width: 420,
-    height: 720,
+    height: 900,
     frame: false,
     transparent: true,
     alwaysOnTop: false,

@@ -1949,3 +1949,574 @@ In Phase 6 you will:
 ---
 
 *Phase 5 — last updated: Phase 5*
+
+---
+
+## ✅ Phase 5 — Live2D Anime Avatar Complete ✅
+
+**What was fixed:**
+- `require()` mixed with `import` → pure ESM `import * as PIXI from "pixi.js"`
+- `import Application from "pixi.js"` (no default export) → `import * as PIXI`
+- Nested `useEffect` hooks → both at component root level
+- `transparent` typo → `backgroundAlpha: 0`  (Pixi v7 API)
+- `MODEL_PATH` / `EXPRESSIONS` undeclared → added `const`
+- `model.expression()` → `model.motion()` (hiyori has NO Expressions, only Motions)
+- Missing `Live2DModel.registerTicker(PIXI.Ticker)` → added (required for animation)
+- Pixi vite ESM crash → fixed with `optimizeDeps.include` in vite.config.js
+- CI ruff error → added `ruff>=0.9` to `[dependency-groups]` in pyproject.toml
+
+**Hiyori model motion groups (from hiyori_free_t08.model3.json):**
+
+| Chat State | Motion Group | Description |
+|---|---|---|
+| idle | `Idle` | Calm breathing loop (3 variants) |
+| thinking | `FlickDown` | Looking down thoughtfully |
+| speaking | `Tap` | Cheerful response |
+| happy | `Flick` | Excited reaction |
+
+---
+
+## 🖼️ Bonus — How to Make JARVIS Use YOUR Face (Custom Avatar)
+
+> This is a separate optional guide. You do not need to do this now.
+> Come back to it whenever you want to replace hiyori with yourself!
+
+---
+
+### 🎯 Goal
+
+Replace the hiyori anime model with a custom avatar made from your own photos —
+turning JARVIS into a personalised AI companion that literally looks like you
+(or any character you design).
+
+---
+
+### 🤔 Three Approaches — Pick One
+
+#### Option A: VTuber-Style (Recommended for Beginners) 🟢
+
+**What you need:** 1 clear front-facing photo of yourself
+
+**How it works:**
+1. Upload your photo to **ReadyPlayerMe** (https://readyplayer.me)
+2. Their AI creates a 3D avatar from your photo in 2 minutes
+3. Download as `.glb` (3D) or use their SDK
+4. Render it in Electron using **Three.js** (WebGL 3D renderer)
+
+**Why it's good:** Completely free, no art skills needed, auto-generated from your photo
+
+**Why it's limited:** 3D avatar, not 2D anime style. Less "JARVIS" feeling.
+
+---
+
+#### Option B: AI-Generated Live2D Model 🟡
+
+**What you need:** A few reference photos of yourself or a character you want
+
+**How it works:**
+1. Use **VRoid Studio** (https://vroid.com/en/studio) — free desktop app
+   - Create a stylised anime character by adjusting sliders
+   - Export as `.vrm` format
+2. Use **live2d-converter** tools to approximate a Live2D rig from the VRM
+   OR
+   Use a **VRoid → Live2D** pipeline (requires Cubism Editor Pro — $160/year)
+
+**Why it's good:** True anime style, your design, free base tools
+**Why it's limited:** Full Live2D rigging from scratch needs Cubism Pro
+
+---
+
+#### Option C: AI Portrait → Animated PNG (Simplest) 🟢
+
+**What you need:** A selfie
+
+**How it works:**
+1. Use **Lensa AI** or **Stable Diffusion** with your photo to generate an anime portrait
+2. Use **DeepMotion** or **Animated Drawings** (Meta AI, free) to add movement
+3. Export as animated WebP or a sprite sheet
+4. Display in your Electron window as an `<img>` with CSS animations instead of Live2D
+
+**Why it's good:** Fastest, no 3D or Live2D knowledge needed
+**Why it's limited:** Pre-baked animation, can't change expressions dynamically
+
+---
+
+### 🪜 Recommended Path: Option C for Now, Option B Later
+
+For a 15-year-old builder, this is the most realistic path:
+
+**Phase 5 (now):** Use hiyori — free, works, looks great ✅
+**Future upgrade:** When you have more time, use VRoid Studio to design a custom avatar,
+then come back and replace the model path in `Avatar.jsx` — it is literally 1 line change.
+
+---
+
+### 🛠️ If You Want to Use Option C Right Now
+
+Here are the exact steps:
+
+**Step 1 — Generate an anime portrait of yourself:**
+Go to https://huggingface.co/spaces/AP123/IllusionDiffusion
+Upload your photo, choose anime style, download the result.
+
+**Step 2 — Make it move (Meta's Animated Drawings):**
+Go to https://sketch.metademolab.com/
+Upload your anime portrait, select movement type, download the animated version.
+
+**Step 3 — Add it to your Electron app:**
+Instead of the `<canvas>` in Avatar.jsx, use:
+```jsx
+<img
+  src={jarvisImage}
+  className="h-48 object-contain"
+  style={{ filter: expression === "thinking" ? "hue-rotate(180deg)" : "none" }}
+/>
+```
+
+Use CSS filters (`brightness`, `hue-rotate`, `saturate`) to simulate mood changes.
+
+---
+
+## 🔗 Phase 6 — LangGraph Agents
+
+> **Stop after this phase and tell me "Phase 6 done" when finished!**
+
+---
+
+### 🎯 Goal
+
+Replace the single `ChatAgent` with a **multi-agent system** using LangGraph.
+
+By the end, JARVIS will have three specialised agents working as a team:
+
+- **Planner** — receives the user's message and decides the plan
+- **Chat agent** — handles pure conversation (Phase 2's ChatAgent, enhanced)
+- **Safety agent** — reviews every plan before execution (no dangerous actions)
+
+Each agent is a node in a **directed graph** — LangGraph manages the flow between them.
+
+---
+
+### 🤔 Why This Phase Matters
+
+Right now JARVIS can only chat. To do things — open apps, automate tasks, control
+your desktop — it needs to make decisions:
+
+```
+"Open Chrome and search for Python tutorials"
+        ↓
+Planner: "I need to open Chrome, then search"
+        ↓
+Safety:  "Opening Chrome is safe. Searching is safe. ✅ Approved."
+        ↓
+Desktop Agent: executes the plan step by step
+```
+
+A single agent trying to do all this gets confused. Three specialised agents,
+each great at one job, is how real AI systems are built — this pattern is used
+by Google, OpenAI, Anthropic, and every serious AI company.
+
+**LangGraph** is the framework that wires them together. It was built by the same
+team that made LangChain and is the industry standard for multi-agent AI systems.
+
+---
+
+### 🧠 Two Concepts to Understand First
+
+#### 1. What is a Graph in LangGraph?
+
+A **graph** is a flowchart for your agents. Each box (node) is an agent or step.
+Each arrow (edge) says "after this step, go here next."
+
+```
+START
+  ↓
+[Planner Node]          ← decides: "is this a chat or a task?"
+  ↓
+[Router]                ← "chat" → ChatNode | "task" → SafetyNode
+  ↓              ↓
+[Chat Node]   [Safety Node]    ← safety checks the plan
+  ↓              ↓
+[END]         [END or retry]
+```
+
+#### 2. What is State?
+
+The **state** is the shared memory all nodes can read and write.
+Think of it as a whiteboard that each agent can read and update:
+
+```python
+class JARVISState(TypedDict):
+    messages: list         # full conversation history
+    user_input: str        # what the user typed
+    plan: str              # the Planner's current plan
+    safe_to_run: bool      # Safety agent's verdict
+    final_reply: str       # what JARVIS sends back to the user
+```
+
+Every node receives the current state, does its job, and returns updated state.
+
+---
+
+### 🪜 Step-by-Step Instructions
+
+---
+
+#### Step 1 — Install LangGraph
+
+```
+uv add langgraph langchain-google-genai
+```
+
+**What these do:**
+
+| Package | Purpose |
+|---|---|
+| `langgraph` | The graph framework — `StateGraph`, nodes, edges, routing |
+| `langchain-google-genai` | LangChain wrapper for Gemini — lets LangGraph call Gemini |
+
+Verify:
+```
+uv run python -c "import langgraph; print(langgraph.__version__)"
+```
+
+---
+
+#### Step 2 — Create the Folder Structure
+
+```
+JARVIS/
+└── agents/
+    ├── chat/
+    │   └── agent.py          ← already exists (your Phase 2 ChatAgent)
+    └── graph/                ← NEW folder
+        ├── __init__.py       ← empty
+        ├── state.py          ← JARVISState TypedDict
+        ├── nodes.py          ← planner_node, safety_node, chat_node
+        └── graph.py          ← builds and compiles the StateGraph
+```
+
+---
+
+#### Step 3 — Write `agents/graph/state.py`
+
+```
+PSEUDOCODE for agents/graph/state.py:
+
+--- IMPORTS ---
+Import: TypedDict from typing
+Import: Annotated from typing
+Import: add_messages from langgraph.graph.message
+
+--- STATE CLASS ---
+class JARVISState(TypedDict):
+
+    messages: Annotated[list, add_messages]
+        Purpose: full conversation history.
+        Annotated with add_messages means LangGraph
+        automatically appends new messages instead of replacing
+
+    user_input: str
+        Purpose: the raw string the user typed
+
+    intent: str
+        Purpose: "chat" or "task" — set by planner
+        Default: "chat"
+
+    plan: str
+        Purpose: the Planner's description of what to do
+        Default: "" (empty string)
+
+    safe_to_run: bool
+        Purpose: True if Safety agent approved the plan
+        Default: True
+
+    final_reply: str
+        Purpose: the reply that goes back to the user
+        Default: ""
+```
+
+---
+
+#### Step 4 — Write `agents/graph/nodes.py`
+
+```
+PSEUDOCODE for agents/graph/nodes.py:
+(Write Python yourself — read carefully!)
+
+--- IMPORTS ---
+Import: ChatGoogleGenerativeAI from langchain_google_genai
+Import: HumanMessage, SystemMessage, AIMessage from langchain_core.messages
+Import: JARVISState from .state
+Import: GEMINI_API_KEY, AI_MODEL from core.config.settings
+
+Create one LLM instance (reused by all nodes):
+    llm = ChatGoogleGenerativeAI(
+        model=AI_MODEL,
+        google_api_key=GEMINI_API_KEY,
+        temperature=0.7
+    )
+
+--- NODE 1: planner_node ---
+def planner_node(state: JARVISState) -> dict:
+    Purpose: Look at the user's message and decide:
+             - intent = "chat"  if it's conversation
+             - intent = "task"  if it needs desktop action (open app, search, etc.)
+
+    Steps:
+        1. Build a prompt:
+           system = """
+           You are a planner. Classify the user message as one of:
+           - "chat": normal conversation, questions, or information requests
+           - "task": requests to open apps, control the desktop, search web,
+                     create files, or take any real-world action
+
+           Respond with ONLY the single word: chat OR task
+           """
+           messages = [SystemMessage(system), HumanMessage(state["user_input"])]
+
+        2. Call the LLM:
+           response = llm.invoke(messages)
+
+        3. Parse intent:
+           intent = response.content.strip().lower()
+           If intent is not "task": intent = "chat"  (default to chat if unclear)
+
+        4. If intent is "task":
+           Make another LLM call to create a plan description:
+           plan_prompt = f"The user wants to: {state['user_input']}. Describe the steps needed in one sentence."
+           plan = llm.invoke([HumanMessage(plan_prompt)]).content
+
+        5. Return updated state:
+           Return {"intent": intent, "plan": plan if task else ""}
+
+--- NODE 2: chat_node ---
+def chat_node(state: JARVISState) -> dict:
+    Purpose: Handle pure conversation using the existing ChatAgent style.
+
+    Steps:
+        1. Build conversation prompt from state["messages"]
+        2. Add system prompt: "You are JARVIS, a helpful AI desktop companion..."
+        3. Call llm.invoke(messages)
+        4. Get reply from response.content
+        5. Return: {"final_reply": reply}
+
+--- NODE 3: safety_node ---
+def safety_node(state: JARVISState) -> dict:
+    Purpose: Review the plan and approve or reject it.
+
+    Steps:
+        1. Build prompt:
+           "Review this plan: '{state['plan']}'
+            Is this safe to execute on a Windows desktop?
+            Does it avoid deleting files, accessing passwords, or private data?
+            Respond with ONLY: safe OR unsafe"
+
+        2. Call LLM.
+
+        3. Parse response:
+           verdict = response.content.strip().lower()
+           safe_to_run = (verdict == "safe")
+
+        4. If not safe:
+           Set final_reply = "I am not allowed to do that — it might be unsafe."
+
+        5. Return: {"safe_to_run": safe_to_run, "final_reply": ...}
+
+--- ROUTER FUNCTION ---
+def route_after_planner(state: JARVISState) -> str:
+    Purpose: Decides which node to go to after the planner.
+             This is used as a conditional edge in the graph.
+
+    If state["intent"] == "task":
+        Return "safety"        <- route to safety check
+    Else:
+        Return "chat"          <- route to chat
+```
+
+---
+
+#### Step 5 — Write `agents/graph/graph.py`
+
+```
+PSEUDOCODE for agents/graph/graph.py:
+
+--- IMPORTS ---
+Import: StateGraph, END from langgraph.graph
+Import: JARVISState from .state
+Import: planner_node, chat_node, safety_node, route_after_planner from .nodes
+
+--- BUILD GRAPH ---
+def build_graph():
+    1. Create the graph:
+       graph = StateGraph(JARVISState)
+
+    2. Add nodes:
+       graph.add_node("planner", planner_node)
+       graph.add_node("chat",    chat_node)
+       graph.add_node("safety",  safety_node)
+
+    3. Set the entry point:
+       graph.set_entry_point("planner")
+
+    4. Add conditional edge after planner:
+       graph.add_conditional_edges(
+           "planner",              <- from this node
+           route_after_planner,   <- call this function to decide
+           {
+               "chat":   "chat",   <- if function returns "chat" → go to chat node
+               "safety": "safety", <- if returns "safety" → go to safety node
+           }
+       )
+
+    5. Add final edges:
+       graph.add_edge("chat",   END)   <- chat → done
+       graph.add_edge("safety", END)   <- safety → done
+
+    6. Compile and return:
+       return graph.compile()
+
+--- MODULE LEVEL ---
+Create a compiled graph ready to use:
+    jarvis_graph = build_graph()
+```
+
+---
+
+#### Step 6 — Update `main.py` and `server.py` to Use the Graph
+
+In `server.py`, update the `/chat` endpoint to call the graph instead of the ChatAgent directly:
+
+```
+PSEUDOCODE — change in server.py:
+
+--- NEW IMPORT ---
+Import: jarvis_graph from agents.graph.graph
+
+--- CHANGE THE /chat ENDPOINT ---
+Old code: reply = agent.chat(request.message)
+
+New code:
+    result = jarvis_graph.invoke({
+        "user_input": request.message,
+        "messages": [],
+        "intent": "chat",
+        "plan": "",
+        "safe_to_run": True,
+        "final_reply": "",
+    })
+    reply = result["final_reply"]
+
+Keep the ChatAgent for the terminal mode — it's simpler and useful for testing.
+The API now uses the graph, which adds Planner + Safety on top.
+```
+
+---
+
+#### Step 7 — Test the Graph
+
+```
+uv run python -c "
+from agents.graph.graph import jarvis_graph
+
+# Test 1: Pure chat
+result = jarvis_graph.invoke({
+    'user_input': 'Hello! What is 2 + 2?',
+    'messages': [],
+    'intent': 'chat',
+    'plan': '',
+    'safe_to_run': True,
+    'final_reply': '',
+})
+print('Chat reply:', result['final_reply'])
+print('Intent detected:', result['intent'])
+
+# Test 2: Task request
+result2 = jarvis_graph.invoke({
+    'user_input': 'Open Chrome and search for Python tutorials',
+    'messages': [],
+    'intent': 'chat',
+    'plan': '',
+    'safe_to_run': True,
+    'final_reply': '',
+})
+print('Task intent:', result2['intent'])
+print('Plan:', result2['plan'])
+print('Safe:', result2['safe_to_run'])
+"
+```
+
+---
+
+#### Step 8 — Ruff and Commit
+
+```
+uv run ruff check .
+uv run ruff format .
+git add .
+git commit -m "Phase 6: LangGraph multi-agent system (Planner + Chat + Safety)"
+```
+
+---
+
+### 📁 Files Changed in Phase 6
+
+| File | What Changed |
+|------|-------------|
+| `agents/graph/__init__.py` | New — empty module marker |
+| `agents/graph/state.py` | New — JARVISState TypedDict |
+| `agents/graph/nodes.py` | New — planner, chat, and safety nodes |
+| `agents/graph/graph.py` | New — StateGraph assembly and compilation |
+| `apps/desktop/backend/server.py` | Updated — /chat uses jarvis_graph |
+| `pyproject.toml` | Updated — langgraph + langchain-google-genai added |
+
+---
+
+### ⚠️ Common Mistakes to Watch Out For
+
+| Mistake | Why It's Bad | How to Avoid |
+|---------|-------------|--------------|
+| Using `langgraph` without `langchain-google-genai` | Gemini won't work with LangGraph | Install both together |
+| Forgetting to add `agents` to hatchling packages | Import errors in production | Already set in pyproject.toml |
+| Not adding default values to JARVISState | Graph crashes if a key is missing | Always add defaults: `"intent": "chat"` |
+| Returning full state from a node | LangGraph merges — only return changed keys | Return only what the node modified |
+| Planner saying "task" for everything | Safety runs when not needed, slows things down | Tune the planner system prompt carefully |
+
+---
+
+### ✅ Phase 6 Success Checklist
+
+- [ ] 🟢 `uv run python -c "from agents.graph.graph import jarvis_graph; print('graph ok')"` works
+- [ ] 🟢 Test script shows correct intent ("chat" for questions, "task" for actions)
+- [ ] 🟢 Server's `/chat` endpoint uses the graph (test via `npm start`)
+- [ ] 🟢 Safety agent rejects obviously unsafe requests
+- [ ] 🟢 `uv run ruff check .` — zero errors
+- [ ] 🟢 Git commit done
+
+---
+
+### 🎊 Phase 6 Celebration
+
+JARVIS is no longer just a chatbot — it's a **multi-agent AI system**! 🔗
+
+You have:
+- A Planner that understands intent
+- A Safety agent that protects the user
+- A graph that routes intelligently
+- The same architecture used by serious AI products at Google and OpenAI 🏆
+
+---
+
+### 🎉 When You Are Done
+
+Tell me **"Phase 6 done!"** and we will move on to **Phase 7 — Laya Tool Registry** 🧰
+
+In Phase 7 you will:
+- Install and configure the Laya open-source tool execution layer
+- Register your first desktop tools (open app, search, screenshot)
+- Wire Laya into the LangGraph Safety + Desktop agents
+- Every new JARVIS ability from here on = a new Laya tool file
+
+---
+
+*Phase 6 — last updated: Phase 6*
