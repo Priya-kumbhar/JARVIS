@@ -11,12 +11,10 @@ export default defineConfig({
   },
   base: "./",
   optimizeDeps: {
-    // Pixi.js v7 is CJS-first; Vite must pre-bundle it properly
-    include: ["pixi.js", "pixi-live2d-display"],
+    include: ["pixi.js", "pixi-live2d-display", "pixi-live2d-display/cubism4"],
   },
   build: {
     commonjsOptions: {
-      // Allow Vite to transform Pixi's CJS require() calls
       include: [/pixi\.js/, /pixi-live2d-display/, /node_modules/],
     },
   },

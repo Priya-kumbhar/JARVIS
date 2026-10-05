@@ -3,6 +3,12 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 
+// Enable WebGL before the app is ready — required for Live2D + Pixi.js
+// Without these, gl.getParameter() returns 0 inside the GPU sandbox
+app.commandLine.appendSwitch("enable-webgl");
+app.commandLine.appendSwitch("ignore-gpu-blocklist");
+app.commandLine.appendSwitch("disable-gpu-sandbox");
+
 const isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {

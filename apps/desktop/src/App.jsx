@@ -16,7 +16,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
-  const [avatarExpression,setAvatarExpression]=useState("idle")
+  const [avatarExpression, setAvatarExpression] = useState("idle");
 
   useEffect(() => {
     async function checkHealth() {
