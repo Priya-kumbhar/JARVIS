@@ -33,7 +33,7 @@ ignore = [
 fixable = ["ALL"]
 unfixable = []
 
-# Files/directories to exclude from linting
+# Files/directories to exclude from linting AND formatting
 exclude = [
     ".git",
     ".venv",
@@ -42,6 +42,8 @@ exclude = [
     "*.egg-info",
     "build",
     "dist",
+    "*.md",    
+    "Phases",  
 ]
 
 [lint.isort]
@@ -59,3 +61,5 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "lf"
+docstring-code-format = false
+exclude = ["*.md", "**/*.md"]
